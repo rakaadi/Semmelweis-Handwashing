@@ -1,0 +1,239 @@
+Semmelweis\&Handwashing
+================
+Raka Adinugraha
+
+# Dr. Ignaz Semmelweis
+
+Born in 1818, [Dr. Ignaz
+Semmelweis](https://en.wikipedia.org/wiki/Ignaz_Semmelweis) is a
+Hungarian physician and active at the Vienna General Hospital during
+1840s. Now known as the pioneer of antispetic procedures.
+
+At that time, giving a birth was very dangerous because of [childbed
+fever](https://en.wikipedia.org/wiki/Puerperal_fever). A deadly disease
+affecting a woman that just has given birth. In the early 1840s, as many
+as 10% of the women giving birth die from it in the Vienna general
+hospital. Dr. Semmelweis knows the cause: it’s the contaminated hands of
+the doctors delivering the babies. Instead, they ridiculed
+Dr. Semmelweis finding and ignoring him.
+
+In this project, we going to reanalyze the data of Dr. Semmelweis’s
+finding on the importance of *handwashing*. First, let’s start by
+looking at the data that shows there is something wrong at the Vienna
+General Hospital that boggles Dr. Semmelweis at that time.
+
+``` r
+# Yearly data by clinic
+Yearly_deaths <- read_csv("yearly_deaths_by_clinic.csv", col_types = cols(
+  births = col_number(),
+  deaths = col_number()))
+knitr::kable(Yearly_deaths)
+```
+
+| year | births | deaths | clinic   |
+| ---: | -----: | -----: | :------- |
+| 1841 |   3036 |    237 | clinic 1 |
+| 1842 |   3287 |    518 | clinic 1 |
+| 1843 |   3060 |    274 | clinic 1 |
+| 1844 |   3157 |    260 | clinic 1 |
+| 1845 |   3492 |    241 | clinic 1 |
+| 1846 |   4010 |    459 | clinic 1 |
+| 1841 |   2442 |     86 | clinic 2 |
+| 1842 |   2659 |    202 | clinic 2 |
+| 1843 |   2739 |    164 | clinic 2 |
+| 1844 |   2956 |     68 | clinic 2 |
+| 1845 |   3241 |     66 | clinic 2 |
+| 1846 |   3754 |    105 | clinic 2 |
+
+# The alarming number of deaths
+
+From the table above, we can see a relatively high number of woman died
+as a result of giving childbirth at two maternity clinic in Vienna
+General Hospital. We can notice that it was indeed dangerous to giving
+births at that time. Most of them died from childbed fever. Now let’s
+add *proportion of deaths* out of woman giving a birth to the table.
+
+``` r
+Yearly_deaths %>%
+  mutate(proportion_deaths = deaths / births) -> Yearly_deaths
+knitr::kable(Yearly_deaths)
+```
+
+| year | births | deaths | clinic   | proportion\_deaths |
+| ---: | -----: | -----: | :------- | -----------------: |
+| 1841 |   3036 |    237 | clinic 1 |          0.0780632 |
+| 1842 |   3287 |    518 | clinic 1 |          0.1575905 |
+| 1843 |   3060 |    274 | clinic 1 |          0.0895425 |
+| 1844 |   3157 |    260 | clinic 1 |          0.0823567 |
+| 1845 |   3492 |    241 | clinic 1 |          0.0690149 |
+| 1846 |   4010 |    459 | clinic 1 |          0.1144638 |
+| 1841 |   2442 |     86 | clinic 2 |          0.0352170 |
+| 1842 |   2659 |    202 | clinic 2 |          0.0759684 |
+| 1843 |   2739 |    164 | clinic 2 |          0.0598759 |
+| 1844 |   2956 |     68 | clinic 2 |          0.0230041 |
+| 1845 |   3241 |     66 | clinic 2 |          0.0203641 |
+| 1846 |   3754 |    105 | clinic 2 |          0.0279702 |
+
+And now lets plot the proportion of deaths of both maternity clinic to
+see if we can get additional information.
+
+``` r
+Yearly_deaths %>%
+  ggplot(aes(x = year, y = proportion_deaths, color = clinic)) +
+  geom_line(size = 1) +
+  labs(x = "Year", y = "Proportion Deaths") +
+  theme_minimal() +
+  theme(legend.title = element_blank())
+```
+
+![](Semmelweis-Handwashing_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+
+As we can see, the deaths on the first clinic always averagely higher
+than on the second clinic, about 10% average mortality rate compared to
+less than 4% on the second clinic.
+
+Both maternity clinics used almost the same techniques in delivering
+babies, but the fact that the first clinic had a much higher mortality
+rate puzzled Dr. Semmelweis.
+
+There is only one major difference between the two clinics. The first
+clinic was the teaching service for medical students, while the second
+clinic was for the instruction of midwives only since 1841. While the
+midwives only tended to woman giving birth, the medical students and the
+doctors also spent their time in autopsy room performing post mortem
+examination on a human corpse. And this explains why the second clinic
+saw a much lower mortality rate because the midwives not engaged in
+autopsies and had no contact with the corpses.
+
+After the meticulous effort, Dr. Semmelweis suspect that something from
+the corpses somehow makes its way to the woman giving birth from the
+medical student’s hands and causing chilbed fever. In June 1847,
+Dr. Semmelweis made handwashing mandatory.
+
+And let’s see the monthly data from clinic 1.
+
+``` r
+# Monthly data from clinic 1
+Monthly_deaths <- read_csv("monthly_deaths.csv", col_types = cols(
+  date = col_date(format = "")))
+
+# Add proportion of deaths
+Monthly_deaths %>%
+  mutate(proportion_deaths = deaths / births) -> Monthly_deaths
+head(Monthly_deaths)
+```
+
+    ## # A tibble: 6 x 4
+    ##   date       births deaths proportion_deaths
+    ##   <date>      <dbl>  <dbl>             <dbl>
+    ## 1 1841-01-01    254     37           0.146  
+    ## 2 1841-02-01    239     18           0.0753 
+    ## 3 1841-03-01    277     12           0.0433 
+    ## 4 1841-04-01    255      4           0.0157 
+    ## 5 1841-05-01    255      2           0.00784
+    ## 6 1841-06-01    200     10           0.05
+
+Now let’s plot the data from the table above. Births count with a blue
+dot, and deaths count with a red dot. In the plot below we can already
+see the effectiveness of handwashing even though we haven’t marked it
+yet.
+
+``` r
+ggplot(Monthly_deaths) +
+  geom_segment(aes(x=date, xend=date, y=deaths, yend=births), color="grey") +
+  geom_point(aes(x=date, y =births), color="dodgerblue4") +
+  geom_point(aes(x=date, y=deaths), color="darkred") +
+  theme_minimal() +
+  labs(x = "Year", y = "Deaths & Births Number")
+```
+
+![](Semmelweis-Handwashing_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+# The handwashing started
+
+After the handwashing made mandatory, the mortality rate drastically
+reduced. We can see it more clearly in the graph below.
+
+``` r
+# Add TRUE/FALSE to identified month with handwashing obligatory
+Monthly_deaths %>%
+  mutate(handwashing_started = date >= as_date('1847-06-01')) -> Monthly_deaths
+
+Monthly_deaths %>%
+  ggplot(aes(x = date, y = proportion_deaths, color = handwashing_started)) +
+  geom_line(size = 1) +
+  labs(x = "Year", y = "Proportion Deaths") +
+  theme_minimal()
+```
+
+![](Semmelweis-Handwashing_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+
+## Fewer deaths after handwashing?
+
+As the graph shows above, it’s indeed that handwashing reduces
+drastically the monthly proportion of deaths. Now let’s see how much
+it’s reduced on average.
+
+``` r
+Monthly_deaths %>% 
+  group_by(handwashing_started) %>%
+  summarise(mean_proportion_deaths = mean(proportion_deaths)) -> monthly_sum
+knitr::kable(monthly_sum)
+```
+
+| handwashing\_started | mean\_proportion\_deaths |
+| :------------------- | -----------------------: |
+| FALSE                |                0.1050500 |
+| TRUE                 |                0.0210934 |
+
+It reduces the proportion of deaths by about 8 percentage points. From
+10% on average to about 2% when handwashing was enforced. And by using
+t-test, we could look at confidence interval to get a feeling for the
+uncertainty around how much handwashing reduces mortalities rate.
+
+``` r
+# Using t-test to calculate 95% confidence interval
+t_result <- t.test(proportion_deaths ~ handwashing_started, data = Monthly_deaths)
+t_result
+```
+
+    ## 
+    ##  Welch Two Sample t-test
+    ## 
+    ## data:  proportion_deaths by handwashing_started
+    ## t = 9.6101, df = 92.435, p-value = 1.445e-15
+    ## alternative hypothesis: true difference in means is not equal to 0
+    ## 95 percent confidence interval:
+    ##  0.06660662 0.10130659
+    ## sample estimates:
+    ## mean in group FALSE  mean in group TRUE 
+    ##          0.10504998          0.02109338
+
+# After the handwashing
+
+When the doctors and medical students didn’t wash their hands, it
+increased the proportion of deaths by around 6.7 to 10 percentage
+points, according to a 95% confidence interval from the previous
+section.
+
+Despite this solid evidence of this finding, the contemporary scientist
+instead ridiculed Dr. Semmelweis’s theory - that some “substance”(what
+we know today as *bacteria*) from autopsy room corpses caused the
+childbed fever. The medical community largely rejected his theory and
+finally, at 1849 Dr. Semmelweis forced to leave the Vienna General
+Hospital for good.
+
+One reason for this was that statistics and statistical arguments were
+uncommon in medical science in the 1800s. If he had access to the
+analysis we’ve just put together he might haven’t got a rejection from
+the contemporary scientist and the medical community.
+
+The [germ theory of
+disease](https://en.wikipedia.org/wiki/Germ_theory_of_disease) that
+offers a theoretical explanation of Dr. Semmelweis findings only get
+developed decades later after Dr. Semmelweis’s deaths. Only after this,
+his practice gets widespread acceptance and then he is considered a
+pioneer of antiseptic procedure.
+
+Up to this day, it still true to some extent that handwashing could save
+lives.
