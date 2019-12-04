@@ -1,4 +1,4 @@
 # Semmelweis-Handwashing
-My Analysis of Dr. Semmelweis data of handwashing effect. 
+My Analysis on Dr. Semmelweis's data of handwashing effect. 
 
 Based on the project idea from datacamp.
